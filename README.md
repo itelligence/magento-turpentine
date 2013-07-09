@@ -1,3 +1,32 @@
+## Note on this Fork: ##
+
+In a normal single server situation the Turpentine extension handles flushing out of the box; however, if you have a complex architecture consisting of an elastic load balancer and multiple ec2 instances (minions) with each ec2 minion running their own varnish server cache complicated by the fact that your Magento admin is on a seperate machine that doesn't even run varnish then you run into issues flushing caches across your server farm.
+
+I have made modifications to:
+Nexcessnet/Turpentine/Model/Observer/Ban.php
+
+The altercations simply set Memcache variables that expire every minute that a cron script on your staging looks for. When it finds a memcache variable for a specific purge request it initiates a SaltStack request across your minion servers to a custom PHP script that reads memcache for recent purge requests.
+
+## Requirements: ##
+
+SaltStack - http://saltstack.com/
+Memcache - (Amazon ElasticCache is perfect)
+Master server (your Magento Admin server if you seperate your admin on a different machine - (I also call this staging))
+Minion servers (all running varnish servers)
+
+
+You need to create a cronjob script to run as root:
+/bin/MemcacheVarnishFlusher
+
+Include this in the script:
+#!/bin/bash
+salt '*' cmd.run 'php /full/path/to/varnish-memcache-flusher.php'
+
+crontab -e "as root and include this":
+* * * * * sh /bin/MemcacheVarnishFlusher
+
+
+
 # [Nexcess.net](https://www.nexcess.net/) Turpentine Extension for Magento
 [![Build Status](https://travis-ci.org/nexcess/magento-turpentine.png?branch=master,devel)](https://travis-ci.org/nexcess/magento-turpentine)
 
