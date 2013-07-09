@@ -19,12 +19,13 @@ You need to create a cronjob script to run as root:
 /bin/MemcacheVarnishFlusher
 
 Include this in the script:
+```bash
 #!/bin/bash
 salt '*' cmd.run 'php /full/path/to/varnish-memcache-flusher.php'
 
 crontab -e "as root and include this":
 * * * * * sh /bin/MemcacheVarnishFlusher
-
+```
 
 
 # [Nexcess.net](https://www.nexcess.net/) Turpentine Extension for Magento
